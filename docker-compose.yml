@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # O Container da sua Aplicação Web-Mobile
+  app:
+    build: . # Indica que o Dockerfile está na mesma pasta
+    container_name: app_fotos_pdf_server
+    ports:
+      - "3000:3000" # Mapeia a porta 3000 do container para a porta 3000 do seu computador
+    environment:
+      - DB_HOST=postgres # Nome do serviço do banco de dados no docker
+      - BUCKET_ENDPOINT=http://minio:9000 # Nome do serviço do minio no docker
+      - SERVIDOR_MASTER=Y:\\RELATORIO_FOTOS
+    depends_on:
+      - postgres
+      - minio
+
+  # Banco de Dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: app_database
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: senha_secreta_123
+      POSTGRES_DB: app_fotos_pdf
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Bucket de Mídias MinIO (Compatível com AWS S3)
+  minio:
+    image: minio/minio
+    container_name: app_bucket
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin_bucket
+      MINIO_ROOT_PASSWORD: senha_bucket_123
+    volumes:
+      - "minio_data:/data"
+    command: server /data --console-address ":9001"
+
+volumes:
+  postgres_data:
+  minio_data:

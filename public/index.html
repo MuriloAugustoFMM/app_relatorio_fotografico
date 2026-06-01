@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foto para PDF - Rede Local</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .btn-select {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background 0.2s;
+        }
+        .btn-select:hover { background-color: #2980b9; }
+        #input-fotos { display: none; }
+        
+        /* Estilização do Campo de Texto */
+        .input-group {
+            margin-bottom: 20px;
+            display: none; /* Escondido por padrão, aparece com as fotos */
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+        .input-text {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .input-text:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .preview-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn-send {
+            width: 100%;
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+        }
+        .btn-send:hover { background-color: #27ae60; }
+
+        .btn-clear {
+            width: 100%;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+        .btn-clear:hover { background-color: #c0392b; }
+        
+        #status {
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+        .success { color: #27ae60; }
+        .error { color: #c0392b; }
+        .loading { color: #f39c12; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Conversor Foto para PDF</h1>
+    
+    <label for="input-fotos" class="btn-select">
+        📸 Tirar Fotos / Selecionar Imagens
+    </label>
+    <input type="file" id="input-fotos" accept="image/*" multiple>
+
+    <div class="preview-container" id="preview"></div>
+
+    <div class="input-group" id="grupo-nome">
+        <label for="nome-arquivo">Nome do Arquivo (Opcional):</label>
+        <input type="text" id="nome-arquivo" class="input-text" placeholder="Ex: Relatorio_Visita, Nfe_Cliente">
+    </div>
+
+    <div class="action-buttons">
+        <button id="btn-enviar" class="btn-send">Gerar PDF e Salvar na Rede</button>
+        <button id="btn-limpar" class="btn-clear">🗑️ Limpar Seleção</button>
+    </div>
+    
+    <div id="status"></div>
+</div>
+
+<script>
+    const input = document.getElementById('input-fotos');
+    const preview = document.getElementById('preview');
+    const grupoNome = document.getElementById('grupo-nome');
+    const inputNome = document.getElementById('nome-arquivo');
+    const btnEnviar = document.getElementById('btn-enviar');
+    const btnLimpar = document.getElementById('btn-limpar');
+    const status = document.getElementById('status');
+    let arquivosSelecionados = [];
+
+    function resetarInterface() {
+        arquivosSelecionados = [];
+        preview.innerHTML = '';
+        btnEnviar.style.display = 'none';
+        btnLimpar.style.display = 'none';
+        grupoNome.style.display = 'none';
+        inputNome.value = '';
+        input.value = '';
+    }
+
+    input.addEventListener('change', (e) => {
+        preview.innerHTML = '';
+        arquivosSelecionados = Array.from(e.target.files);
+        
+        if(arquivosSelecionados.length > 0) {
+            btnEnviar.style.display = 'block';
+            btnLimpar.style.display = 'block';
+            grupoNome.style.display = 'block'; // Mostra o campo de texto quando há fotos
+            status.innerText = '';
+            
+            arquivosSelecionados.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.classList.add('preview-img');
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            resetarInterface();
+        }
+    });
+
+    btnLimpar.addEventListener('click', () => {
+        resetarInterface();
+        status.className = '';
+        status.innerText = 'Seleção limpa!';
+        setTimeout(() => { if(status.innerText === 'Seleção limpa!') status.innerText = ''; }, 3000);
+    });
+
+    btnEnviar.addEventListener('click', async () => {
+        if(arquivosSelecionados.length === 0) return;
+
+        const formData = new FormData();
+        
+        // Passa o nome digitado para o servidor
+        formData.append('nomeBase', inputNome.value.trim());
+
+        arquivosSelecionados.forEach(file => {
+            formData.append('fotos', file);
+        });
+
+        status.className = 'loading';
+        status.innerText = 'Processando imagens e salvando PDF...';
+        btnEnviar.disabled = true;
+        btnLimpar.disabled = true;
+        inputNome.disabled = true;
+
+        try {
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const resultado = await response.json();
+            
+            if(resultado.success) {
+                status.className = 'success';
+                status.innerText = '✅ ' + resultado.message;
+                resetarInterface();
+            } else {
+                status.className = 'error';
+                status.innerText = '❌ Erro: ' + resultado.message;
+            }
+        } catch (err) {
+            status.className = 'error';
+            status.innerText = '❌ Falha ao conectar com o servidor da rede local.';
+        } finally {
+            btnEnviar.disabled = false;
+            btnLimpar.disabled = false;
+            inputNome.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
