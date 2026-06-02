@@ -8,7 +8,7 @@ const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const app = express();
 app.use(cors());
 const port = 3000;
-const SERVIDOR_MASTER_PATH = process.env.SERVIDOR_MASTER
+
 // 1. Configuração do Banco de Dados (PostgreSQL Local)
 const pool = new Pool({
     user: 'admin',

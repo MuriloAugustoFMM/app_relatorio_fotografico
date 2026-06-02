@@ -3,153 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foto para PDF - Rede Local</title>
+    <title>Foto para PDF - Inteligente</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #333;
-        }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            box-sizing: border-box;
-        }
-        h1 {
-            font-size: 1.5rem;
-            text-align: center;
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .btn-select {
-            display: block;
-            background-color: #3498db;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background 0.2s;
-        }
-        .btn-select:hover { background-color: #2980b9; }
+        body { font-family: -apple-system, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 500px; width: 100%; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); box-sizing: border-box; }
+        h1 { font-size: 1.5rem; text-align: center; color: #2c3e50; margin-top: 0; }
+        .btn-select { display: block; background-color: #3498db; color: white; text-align: center; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 20px; }
         #input-fotos { display: none; }
-        
-        /* Estilização do Campo de Texto */
-        .input-group {
-            margin-bottom: 20px;
-            display: none; /* Escondido por padrão, aparece com as fotos */
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 0.9rem;
-        }
-        .input-text {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #bdc3c7;
-            border-radius: 8px;
-            font-size: 1rem;
-            box-sizing: border-box;
-            transition: border-color 0.2s;
-        }
-        .input-text:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-
-        .preview-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .preview-img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .btn-send {
-            width: 100%;
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-        }
-        .btn-send:hover { background-color: #27ae60; }
-
-        .btn-clear {
-            width: 100%;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-            transition: background 0.2s;
-        }
-        .btn-clear:hover { background-color: #c0392b; }
-        
-        #status {
-            margin-top: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
+        .input-group { margin-bottom: 20px; display: none; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .input-text { width: 100%; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .preview-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .preview-img { width: 100%; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
+        .btn-send { width: 100%; background-color: #2ecc71; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; }
+        .btn-clear { width: 100%; background-color: #e74c3c; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; display: none; }
+        #status { margin-top: 15px; text-align: center; font-weight: bold; }
         .success { color: #27ae60; }
         .error { color: #c0392b; }
         .loading { color: #f39c12; }
+        .badge-offline { background-color: #e67e22; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; display: none; text-align: center; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <div id="badge-rede" class="badge-offline">⚠️ Modo Offline Ativo (Envios serão agendados)</div>
     <h1>Conversor Foto para PDF</h1>
     
-    <label for="input-fotos" class="btn-select">
-        📸 Tirar Fotos / Selecionar Imagens
-    </label>
+    <label for="input-fotos" class="btn-select">📸 Tirar Fotos / Selecionar Imagens</label>
     <input type="file" id="input-fotos" accept="image/*" multiple>
 
     <div class="preview-container" id="preview"></div>
 
     <div class="input-group" id="grupo-nome">
-        <label for="nome-arquivo">Nome do Arquivo (Opcional):</label>
-        <input type="text" id="nome-arquivo" class="input-text" placeholder="Ex: Relatorio_Visita, Nfe_Cliente">
+        <label for="nome-arquivo">Nome do Arquivo:</label>
+        <input type="text" id="nome-arquivo" class="input-text" placeholder="Ex: Inventario_Local">
     </div>
 
     <div class="action-buttons">
-        <button id="btn-enviar" class="btn-send">Gerar PDF e Salvar na Rede</button>
+        <button id="btn-enviar" class="btn-send">Gerar PDF e Salvar</button>
         <button id="btn-limpar" class="btn-clear">🗑️ Limpar Seleção</button>
     </div>
     
@@ -164,7 +57,30 @@
     const btnEnviar = document.getElementById('btn-enviar');
     const btnLimpar = document.getElementById('btn-limpar');
     const status = document.getElementById('status');
+    const badgeRede = document.getElementById('badge-rede');
     let arquivosSelecionados = [];
+
+    // --- CONFIGURAÇÃO DO BANCO OFFLINE (IndexedDB) ---
+    let db;
+    const request = indexedDB.open("FilaOfflineDB", 1);
+    request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        db.createObjectStore("fila_envios", { keyPath: "id", autoIncrement: true });
+    };
+    request.onsuccess = (e) => { db = e.target.result; sincronizarFila(); };
+
+    // Detectar status da rede para atualizar aviso visual
+    function atualizarStatusRede() {
+        if (navigator.onLine) {
+            badgeRede.style.display = 'none';
+            sincronizarFila();
+        } else {
+            badgeRede.style.display = 'block';
+        }
+    }
+    window.addEventListener('online', atualizarStatusRede);
+    window.addEventListener('offline', atualizarStatusRede);
+    atualizarStatusRede();
 
     function resetarInterface() {
         arquivosSelecionados = [];
@@ -179,13 +95,11 @@
     input.addEventListener('change', (e) => {
         preview.innerHTML = '';
         arquivosSelecionados = Array.from(e.target.files);
-        
         if(arquivosSelecionados.length > 0) {
             btnEnviar.style.display = 'block';
             btnLimpar.style.display = 'block';
-            grupoNome.style.display = 'block'; // Mostra o campo de texto quando há fotos
+            grupoNome.style.display = 'block';
             status.innerText = '';
-            
             arquivosSelecionados.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
@@ -196,44 +110,56 @@
                 };
                 reader.readAsDataURL(file);
             });
-        } else {
-            resetarInterface();
-        }
+        } else { resetarInterface(); }
     });
 
-    btnLimpar.addEventListener('click', () => {
-        resetarInterface();
-        status.className = '';
-        status.innerText = 'Seleção limpa!';
-        setTimeout(() => { if(status.innerText === 'Seleção limpa!') status.innerText = ''; }, 3000);
-    });
+    btnLimpar.addEventListener('click', resetarInterface);
 
     btnEnviar.addEventListener('click', async () => {
         if(arquivosSelecionados.length === 0) return;
 
-        const formData = new FormData();
-        
-        // Passa o nome digitado para o servidor
-        formData.append('nomeBase', inputNome.value.trim());
+        if (!navigator.onLine) {
+            // --- FLUXO OFFLINE ---
+            status.className = 'loading';
+            status.innerText = 'Dispositivo offline. Salvando na fila do celular...';
 
-        arquivosSelecionados.forEach(file => {
-            formData.append('fotos', file);
-        });
+            const itemFila = {
+                nomeBase: inputNome.value.trim(),
+                fotos: await Promise.all(arquivosSelecionados.map(file => {
+                    return new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve({ blob: reader.result, name: file.name, type: file.type });
+                        reader.readAsDataURL(file);
+                    });
+                }))
+            };
+
+            const tx = db.transaction("fila_envios", "readwrite");
+            tx.objectStore("fila_envios").add(itemFila);
+            tx.oncomplete = () => {
+                status.className = 'success';
+                status.innerText = '📦 Salvo offline com sucesso! Será enviado quando o Wi-Fi voltar.';
+                resetarInterface();
+            };
+            return;
+        }
+
+        // --- FLUXO ONLINE TRADICIONAL ---
+        enviarParaServidor(inputNome.value.trim(), arquivosSelecionados);
+    });
+
+    async function enviarParaServidor(nomeBase, arquivos) {
+        const formData = new FormData();
+        formData.append('nomeBase', nomeBase);
+        arquivos.forEach(file => formData.append('fotos', file));
 
         status.className = 'loading';
-        status.innerText = 'Processando imagens e salvando PDF...';
+        status.innerText = 'Processando imagens e salvando...';
         btnEnviar.disabled = true;
-        btnLimpar.disabled = true;
-        inputNome.disabled = true;
 
         try {
-            const response = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-            
+            const response = await fetch('/upload', { method: 'POST', body: formData });
             const resultado = await response.json();
-            
             if(resultado.success) {
                 status.className = 'success';
                 status.innerText = '✅ ' + resultado.message;
@@ -244,14 +170,54 @@
             }
         } catch (err) {
             status.className = 'error';
-            status.innerText = '❌ Falha ao conectar com o servidor da rede local.';
-        } finally {
-            btnEnviar.disabled = false;
-            btnLimpar.disabled = false;
-            inputNome.disabled = false;
-        }
-    });
-</script>
+            status.innerText = '❌ Falha ao conectar ao servidor local.';
+        } finally { btnEnviar.disabled = false; }
+    }
 
+    // --- FUNÇÃO DE SINCRONIZAÇÃO AUTOMÁTICA ---
+    function sincronizarFila() {
+        if (!db || !navigator.onLine) return;
+
+        const tx = db.transaction("fila_envios", "readonly");
+        const store = tx.objectStore("fila_envios");
+        const requestGetAll = store.getAll();
+
+        requestGetAll.onsuccess = async () => {
+            const itens = requestGetAll.result;
+            if (itens.length === 0) return;
+
+            status.className = 'loading';
+            status.innerText = `Sincronizando ${itens.length} arquivo(s) pendente(s)...`;
+
+            for (const item of itens) {
+                const formData = new FormData();
+                formData.append('nomeBase', item.nomeBase);
+
+                // Reconverte os dados em Base64 de volta para arquivos físicos (Blobs)
+                for (const foto of item.fotos) {
+                    const res = await fetch(foto.blob);
+                    const blob = await res.blob();
+                    formData.append('fotos', blob, foto.name);
+                }
+
+                try {
+                    const response = await fetch('/upload', { method: 'POST', body: formData });
+                    const resJson = await response.json();
+                    if (resJson.success) {
+                        // Se enviou com sucesso, deleta da fila do celular
+                        const deleteTx = db.transaction("fila_envios", "readwrite");
+                        deleteTx.objectStore("fila_envios").delete(item.id);
+                    }
+                } catch (e) {
+                    console.log("Falha temporária de sincronização, tentando mais tarde.");
+                    break;
+                }
+            }
+            status.className = 'success';
+            status.innerText = '🔄 Sincronização automática concluída!';
+            setTimeout(() => { status.innerText = ''; }, 4000);
+        };
+    }
+</script>
 </body>
 </html>

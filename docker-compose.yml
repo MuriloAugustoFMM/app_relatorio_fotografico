@@ -1,21 +1,18 @@
-version: '3.8'
+
 
 services:
-  # O Container da sua Aplicação Web-Mobile
   app:
-    build: . # Indica que o Dockerfile está na mesma pasta
+    build: .
     container_name: app_fotos_pdf_server
     ports:
-      - "3000:3000" # Mapeia a porta 3000 do container para a porta 3000 do seu computador
+      - "3000:3000"
     environment:
-      - DB_HOST=postgres # Nome do serviço do banco de dados no docker
-      - BUCKET_ENDPOINT=http://minio:9000 # Nome do serviço do minio no docker
-      - SERVIDOR_MASTER=Y:\\RELATORIO_FOTOS
+      - DB_HOST=postgres
+      - BUCKET_ENDPOINT=http://minio:9000
     depends_on:
       - postgres
       - minio
 
-  # Banco de Dados PostgreSQL
   postgres:
     image: postgres:15-alpine
     container_name: app_database
@@ -28,7 +25,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # Bucket de Mídias MinIO (Compatível com AWS S3)
+  # Bucket de Mídias MinIO corrigido
   minio:
     image: minio/minio
     container_name: app_bucket
@@ -39,9 +36,11 @@ services:
       MINIO_ROOT_USER: admin_bucket
       MINIO_ROOT_PASSWORD: senha_bucket_123
     volumes:
-      - "minio_data:/data"
-    command: server /data --console-address ":9001"
+      # 1. Apontamos o volume para a raiz /data do container
+      - "C:/Users/flixz/pdfs:/data"
+    # 2. Usamos o comando 'mkdir' antes do servidor iniciar para garantir que a pasta do bucket exista no Windows
+    entrypoint: >
+      sh -c "mkdir -p /data/midias-pdf && minio server /data --console-address ':9001'"
 
 volumes:
   postgres_data:
-  minio_data:
